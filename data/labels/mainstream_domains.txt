@@ -1,0 +1,126 @@
+# Curated mainstream-domain list for high-credibility labeling.
+#
+# Purpose: counterpart to the Iffy+ low-credibility list. A tweet whose URLs
+# resolve to a domain in this file is labeled high-credibility. Tweets whose
+# URLs match neither list remain unlabeled (per CLAUDE.md §Labeling).
+#
+# Selection criteria for v0 (to be refined in Phase 1):
+#   - U.S./international general-news outlets widely rated "High" or "Very High"
+#     factual on Media Bias/Fact Check.
+#   - Span the partisan spectrum where credible outlets exist on both sides;
+#     credibility is about factual reporting, not absence of bias.
+#   - Wires (AP, Reuters), public broadcasters (NPR, PBS, BBC), and dedicated
+#     fact-checking outlets included.
+#   - National-only for v0; local-paper coverage is patchy and adds noise.
+#
+# Format: one bare domain per line (no scheme, no www, no trailing slash).
+# Subdomains will be matched via tldextract registered-domain lookup at
+# label time, so listing the registered domain is sufficient.
+
+# Wires / syndication
+apnews.com
+reuters.com
+
+# Public broadcasting
+npr.org
+pbs.org
+bbc.com
+bbc.co.uk
+
+# U.S. national newspapers
+nytimes.com
+washingtonpost.com
+wsj.com
+usatoday.com
+latimes.com
+chicagotribune.com
+bostonglobe.com
+sfchronicle.com
+miamiherald.com
+dallasnews.com
+seattletimes.com
+denverpost.com
+startribune.com
+azcentral.com
+tampabay.com
+houstonchronicle.com
+
+# U.S. national broadcast/cable news
+abcnews.go.com
+cbsnews.com
+nbcnews.com
+cnn.com
+foxnews.com
+msnbc.com
+cnbc.com
+
+# Politics / government
+politico.com
+thehill.com
+axios.com
+rollcall.com
+c-span.org
+govexec.com
+
+# Financial / business
+bloomberg.com
+ft.com
+forbes.com
+businessinsider.com
+marketwatch.com
+barrons.com
+
+# Magazines (long-form, high-factual)
+theatlantic.com
+newyorker.com
+time.com
+theeconomist.com
+vanityfair.com
+harpers.org
+
+# Investigative / nonprofit
+propublica.org
+themarshallproject.org
+texastribune.org
+icij.org
+revealnews.org
+
+# Fact-checking
+factcheck.org
+snopes.com
+politifact.com
+fullfact.org
+
+# International English-language general news
+theguardian.com
+independent.co.uk
+telegraph.co.uk
+ft.com
+aljazeera.com
+dw.com
+france24.com
+cbc.ca
+abc.net.au
+smh.com.au
+theglobeandmail.com
+
+# Science / specialized (high factual)
+scientificamerican.com
+nature.com
+sciencemag.org
+arstechnica.com
+
+# News magazines / weekly
+newsweek.com
+usnews.com
+
+# Conservative high-factual
+washingtonexaminer.com
+nationalreview.com
+thedispatch.com
+
+# Liberal high-factual
+motherjones.com
+slate.com
+theintercept.com
+vox.com

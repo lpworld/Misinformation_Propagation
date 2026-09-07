@@ -1,0 +1,7 @@
+﻿__pycache__/
+*.pyc
+.pytest_cache/
+data/processed/demo_stage1/
+data/processed/demo_stage2/
+reports/demo_stage1_report.md
+reports/demo_stage2_report.md

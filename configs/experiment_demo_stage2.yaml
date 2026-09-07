@@ -1,0 +1,44 @@
+﻿# Demonstration run, Stage 2 hypothesis test on the bundled sample.
+# Requires the ranker saved by the Stage 1 demonstration run
+# (configs/experiment_demo_stage1.yaml). Simulates all scoring regimes
+# with label-stratified seeds at reduced scale and reports the
+# low-minus-high credibility gaps and cross-regime contrasts.
+#
+# The full-scale counterpart is configs/experiment_phase4.yaml, which
+# uses 50,000 users, 2,500 seeds per label, and 100 replicates.
+
+random_seed: 1337
+
+data:
+  part_parquet: data/processed/part_sample.parquet
+
+labels:
+  iffy_path: data/labels/iffy_plus.csv
+  mainstream_path: data/labels/mainstream_domains.txt
+
+ranker:
+  load_dir: data/processed/demo_stage1/ranker
+
+simulation:
+  n_users: 2000
+  n_per_label: 250
+  n_replicates: 5
+  bootstrap_iterations: 200
+  n_time_bins: 24
+  decay_tau_hours: 6.0
+  exposure_min: 0.0
+  exposure_max: 50000.0
+  score_normalization: median
+  use_circadian: true
+
+calibration:
+  enabled: true
+  target: zero_inflated_nb
+
+scoring:
+  alpha: 1.0
+
+artifacts:
+  out_dir: data/processed/demo_stage2
+  report_path: reports/demo_stage2_report.md
+  preregistration_path: reports/demo_stage2_plan.md

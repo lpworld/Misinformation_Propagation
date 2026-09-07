@@ -1,0 +1,46 @@
+# Truncation sensitivity analysis for the Phase 4 cascade_size contrast.
+#
+# Reads the cached Phase 4 ablation outputs (no re-simulation), caps the
+# per-cascade replicate-mean cascade_size at quantiles drawn from the
+# *observed* aggregate-engagement distribution, and recomputes the paired
+# bootstrap contrast on the capped values.
+#
+# Quantile sweep is pre-specified — do NOT tune the cap to obtain a desired
+# answer. Whatever the result is, report it.
+
+random_seed: 1337
+
+data:
+  # Source for the observed cascade-size cap. Must be the same part the
+  # Phase 4 run used (otherwise the cap and the simulator are calibrated
+  # against different distributions).
+  observed_part_parquet: data/processed/part_1.parquet
+
+phase4:
+  # Cached Phase 4 outputs. Read-only — this script never writes here.
+  per_cascade_parquet: data/processed/phase4/ablation_per_cascade.parquet
+  preregistration_path: paper/phase4_preregistration.md
+
+baseline_regime: additive
+
+# Quantiles of the observed aggregate-engagement distribution at which to
+# cap simulated cascade_size. p90 is the canonical mis-calibration point
+# (design log 2026-04-26 — simulator over-produces by ~3× there); below
+# p90 is the well-calibrated body, above p90 is the poorly-calibrated tail.
+truncation:
+  quantiles: [50, 75, 90, 95, 99]
+  # Ordering within each cascade-replicate stack: AFTER replicate-averaging
+  # (so the cap acts on the central tendency per cascade, not on individual
+  # noisy event-counts). The bootstrap then resamples the truncated values.
+  truncate_after_replicate_mean: true
+  # Winsorization (clip from above) preserves cascade pairing across
+  # regimes. We document the alternative (drop cascades whose baseline
+  # value exceeds cap) but do not run it as primary.
+  mode: winsorize
+
+bootstrap:
+  iterations: 1000
+
+artifacts:
+  out_dir: data/processed/phase4/truncation_sensitivity
+  report_path: paper/phase4_truncation_sensitivity.md

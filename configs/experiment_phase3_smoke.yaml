@@ -1,0 +1,42 @@
+# Phase 3 smoke test — diagnostic for the 10h-no-output hang on the prior run.
+# Goal: verify the full MaskNet pipeline (load → extract_features → train →
+# save) completes end-to-end on a small slice with GPU. If this passes,
+# scale to experiment_phase3_full.yaml. If it hangs, the smoke timings tell
+# us *which step* is broken.
+
+random_seed: 1337
+
+data:
+  part_parquet: data/processed/part_1.parquet
+
+ranker:
+  model_kind: masknet
+  # MaskNetConfig fields (n_features is filled in by the trainer).
+  model_kwargs:
+    embed_dim: 32
+    mask_hidden_mult: 2.0
+    block_hidden_dim: 64
+    n_blocks: 3
+    output_hidden_dims: [64, 32]
+    dropout: 0.1
+
+training:
+  batch_size: 4096
+  lr: 0.001
+  epochs: 1
+  val_frac: 0.1
+  # Smoke: train on a small slice; if this finishes in seconds, the
+  # pipeline is sound and we can safely scale up.
+  max_train_rows: 10000
+  device: cuda
+
+diagnostics:
+  # Probe extract_features() on the full corpus (no training) to catch
+  # the suspected pd.to_datetime / per-row processing hang on user_created_at
+  # before sinking time into a full training run.
+  feature_probe_full_corpus: true
+
+artifacts:
+  out_dir: data/processed/phase3_smoke
+  ranker_subdir: ranker
+  report_path: paper/phase3_smoke_report.md

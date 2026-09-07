@@ -1,0 +1,48 @@
+# Phase 3 simulation + Stage 1 validation.
+# Loads the trained MaskNet (configs/experiment_phase3_full.yaml output),
+# scales the simulator to ~publication-grade size, runs all 3 scoring
+# regimes, and runs all 4 Stage 1 distribution-matching metrics.
+#
+# Stage 1 is label-free per the design specification. Labels enter at Phase 4.
+
+random_seed: 1337
+
+data:
+  part_parquet: data/processed/part_1.parquet
+
+ranker:
+  # Reuse the artifact written by configs/experiment_phase3_full.yaml.
+  load_dir: data/processed/phase3_full/ranker
+
+simulation:
+  n_users: 50000
+  n_cascades: 5000
+  n_time_bins: 24
+  decay_tau_hours: 6.0
+  exposure_min: 0.0
+  exposure_max: 50000.0
+  score_normalization: median
+  use_circadian: true
+  originals_only_seeds: false
+
+calibration:
+  # Match observed P(reply=0) and conditional non-zero mean under the
+  # additive regime via the per-cascade Bernoulli activity gate; reuse the
+  # same baseline + activity_pi across all three regimes (regime differences
+  # should sit in score aggregation, not in calibration parameters).
+  # See design log 2026-04-26 for the partial-match finding that motivated
+  # switching from target=mean to target=zero_inflated.
+  enabled: true
+  # zero_inflated_nb: zero_inflated + Negative-Binomial event model.
+  # Adds dispersion_r calibrated from observed Var/Mean of conditional
+  # non-zero replies. Addresses the residual p90 over-prediction left
+  # after the zero_inflated (Poisson) iteration — Poisson tails are
+  # fundamentally too thin for engagement data. See design log 2026-04-26.
+  target: zero_inflated_nb
+
+scoring:
+  alpha: 1.0  # ablated regime: gate strength
+
+artifacts:
+  out_dir: data/processed/phase3_sim
+  report_path: paper/phase3_sim_report.md

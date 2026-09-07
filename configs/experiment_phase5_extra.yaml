@@ -1,0 +1,93 @@
+# Phase 5 extra — supplementary robustness sweeps (RB1, RB2, RB3a, RB3b).
+#
+# Adds three sweeps beyond the original Phase 5 four:
+#   RB1: cross-product partition × ranker_seed (4 × 5 = 20 cells).
+#   RB2: user-sample-size sensitivity (n_users = {25K, 50K, 100K}).
+#   RB3: enlarged training corpus (parts 1+2 retraining; optional parts 3-5).
+#
+# All sweeps share a common Phase-4 backbone (calibration, simulator,
+# bootstrap) inherited from analysis.run_phase5._run_variant. Output goes
+# to data/processed/phase5_extra/ + paper/phase5_extra_report.md.
+
+random_seed: 1337
+
+data:
+  parts:
+    - data/processed/part_1.parquet
+    - data/processed/part_2.parquet
+  primary_part: data/processed/part_1.parquet
+
+labels:
+  iffy_path: data/labels/iffy_plus.csv
+  mainstream_path: data/labels/mainstream_domains.txt
+
+ranker:
+  load_dir: data/processed/phase3_full/ranker
+  seeds_dir: data/processed/phase5/ranker_seeds  # reuse the trained seeds
+
+simulation:
+  n_users: 50000        # baseline; RB2 overrides per-cell
+  n_per_label: 2500
+  n_replicates: 100
+  n_time_bins: 24
+  decay_tau_hours: 6.0
+  exposure_min: 0.0
+  exposure_max: 50000.0
+  score_normalization: median
+  use_circadian: true
+  bootstrap_iterations: 1000
+
+calibration:
+  enabled: true
+  target: zero_inflated_nb
+
+scoring_alpha: 1.0
+
+sweeps:
+  # RB1: cross-product (partition × ranker_seed). The four partitions are
+  # the same set as Phase 5 Sweep 2, applied here under each of the five
+  # trained ranker checkpoints.
+  cross_product:
+    partitions:
+      - name: default (reply,deep | retweet,like)
+        slow: [reply, deep]
+        fast: [retweet, like]
+      - name: quote-as-fast (reply | retweet,like,deep)
+        slow: [reply]
+        fast: [retweet, like, deep]
+      - name: like-as-slow (reply,deep,like | retweet)
+        slow: [reply, deep, like]
+        fast: [retweet]
+      - name: reply-only-slow (reply | retweet,like)
+        slow: [reply]
+        fast: [retweet, like]
+    ranker_seeds: [1337, 42, 7, 100, 2024]
+
+  # RB2: user-sample-size sweep. Runs on the default partition + baseline
+  # ranker (seed=1337). Tests scaling of the audience_reach contrast.
+  user_sample_sizes: [25000, 50000, 100000]
+
+  # RB3: enlarged training corpus.
+  # - parts_1_2: train MaskNet on union of parts 1 and 2 (already on disk,
+  #   no network).
+  # - parts_1_to_5: optional, only runs if parts 3-5 parquet exist on disk.
+  enlarged_training:
+    runs:
+      - name: parts_1_2
+        train_parquets:
+          - data/processed/part_1.parquet
+          - data/processed/part_2.parquet
+        out_subdir: ranker_parts_1_2
+      - name: parts_1_to_5
+        train_parquets:
+          - data/processed/part_1.parquet
+          - data/processed/part_2.parquet
+          - data/processed/part_3.parquet
+          - data/processed/part_4.parquet
+          - data/processed/part_5.parquet
+        out_subdir: ranker_parts_1_to_5
+        # Driver checks parquets exist before running; missing → skip.
+
+artifacts:
+  out_dir: data/processed/phase5_extra
+  report_path: paper/phase5_extra_report.md

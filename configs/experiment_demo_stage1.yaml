@@ -1,0 +1,40 @@
+# Demonstration run, Stage 1 loop on the bundled sample.
+# Trains a small ranker on the 30k-tweet sample, simulates 100 cascades
+# for 1,000 users under the additive regime, and writes the Stage 1
+# validation metrics and a short report. Runs in a few minutes on CPU.
+
+random_seed: 1337
+
+data:
+  part_parquet: data/processed/part_sample.parquet
+
+ranker:
+  hidden_dims: [32, 16]
+  dropout: 0.1
+
+training:
+  batch_size: 4096
+  lr: 0.001
+  epochs: 3
+  val_frac: 0.1
+  max_train_rows: 30000
+
+simulation:
+  n_users: 1000
+  n_cascades: 100
+  n_time_bins: 24
+  decay_tau_hours: 6.0
+  baseline_exposures: 200.0
+  exposure_min: 5.0
+  exposure_max: 5000.0
+  score_normalization: median
+  originals_only_seeds: false
+
+scoring:
+  regime: additive
+  alpha: 1.0
+
+artifacts:
+  out_dir: data/processed/demo_stage1
+  ranker_subdir: ranker
+  report_path: reports/demo_stage1_report.md

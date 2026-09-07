@@ -1,0 +1,35 @@
+# Phase 3 full training — MaskNet on the entire part_1 corpus, GPU.
+# Use only after configs/experiment_phase3_smoke.yaml passes end-to-end.
+
+random_seed: 1337
+
+data:
+  part_parquet: data/processed/part_1.parquet
+
+ranker:
+  model_kind: masknet
+  model_kwargs:
+    embed_dim: 32
+    mask_hidden_mult: 2.0
+    block_hidden_dim: 64
+    n_blocks: 3
+    output_hidden_dims: [64, 32]
+    dropout: 0.1
+
+training:
+  batch_size: 4096
+  lr: 0.001
+  epochs: 5
+  val_frac: 0.1
+  # null → use the entire cleaned corpus (~1M rows for part_1).
+  max_train_rows: null
+  device: cuda
+
+diagnostics:
+  # Already validated in the smoke run; skip the redundant probe here.
+  feature_probe_full_corpus: false
+
+artifacts:
+  out_dir: data/processed/phase3_full
+  ranker_subdir: ranker
+  report_path: paper/phase3_full_report.md

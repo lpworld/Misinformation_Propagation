@@ -1,0 +1,43 @@
+# Phase 2 MVP — minimum viable end-to-end run.
+# Goal per the design specification: 100 cascades, 1000 users, the loop runs without errors.
+# Don't tune for "results" yet; tune for "shape and plausibility."
+
+random_seed: 1337
+
+data:
+  # Use the cached parquet from Phase 1 — Phase 2 doesn't re-parse raw chunks.
+  part_parquet: data/processed/part_1.parquet
+
+ranker:
+  hidden_dims: [32, 16]
+  dropout: 0.1
+
+training:
+  batch_size: 4096
+  lr: 0.001
+  epochs: 5
+  val_frac: 0.1
+  max_train_rows: 200000
+
+simulation:
+  n_users: 1000
+  n_cascades: 100
+  n_time_bins: 24            # 24 hourly bins → 1-day cascade window
+  decay_tau_hours: 6.0
+  baseline_exposures: 200.0
+  exposure_min: 5.0
+  exposure_max: 5000.0
+  score_normalization: median
+  originals_only_seeds: false
+
+scoring:
+  # MVP runs the additive (current) regime to validate the loop. The two
+  # other regimes are wired via ranker.scoring.make_default_configs() and
+  # exercised in the multi-regime ablation harness in Phase 4.
+  regime: additive
+  alpha: 1.0                 # only used by ablated regime
+
+artifacts:
+  out_dir: data/processed/phase2_mvp
+  ranker_subdir: ranker
+  report_path: paper/phase2_report.md
