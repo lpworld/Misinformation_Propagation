@@ -16,18 +16,6 @@ data/
 reports/        Output reports from demonstration runs are written here
 ```
 
-## Terminology
-
-The code predates some of the naming used in the paper, and the identifiers below are
-kept as they are so that saved outputs and configurations continue to load.
-
-| Paper | Code |
-|-------|------|
-| reflective threshold (F3), parameter theta | `reflective_floor` regime, `floor` and `floor_scale` |
-| engagement objectives | prediction heads, `slow_heads` / `fast_heads` |
-| gap reduction | `closure` |
-| targeting / propagation / claim-level checks | prong 1 / prong 3 / prong 2 |
-
 ## Environment
 
 Python 3.10 to 3.12. From the package root:
